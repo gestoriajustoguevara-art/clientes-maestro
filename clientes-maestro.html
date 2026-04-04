@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClientesMAESTRO — Gestoría Justo Guevara</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --script-url: 'https://script.google.com/macros/s/AKfycbyVXypuTXm5tRvbP-xJu06q7ZsJ2qve790lCyvBLJpr6jTckZhc6wZ4kX5XPhVOWCVrww/exec';
+    --bg: #f4f1eb;
+    --panel: #ffffff;
+    --ink: #1a1a2e;
+    --ink2: #4a4a6a;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --accent: #1a3a5c;
+    --accent2: #1a5c2a;
+    --danger: #8b1a1a;
+    --border: #ddd8cc;
+    --shadow: 0 4px 24px rgba(26,26,46,0.10);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    position: sticky; top: 0; z-index: 100;
+  }
+  header .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+  }
+  header .logo span { color: var(--gold-light); }
+  header .subtitle { font-size: 0.78rem; opacity: 0.7; margin-top: 2px; }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* BOTONES */
+  .btn {
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--gold); color: white; }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.5); color: white; }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: #1e4a73; }
+  .btn-success { background: var(--accent2); color: white; }
+  .btn-success:hover { background: #1e7a34; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* LAYOUT PRINCIPAL */
+  .main { display: flex; min-height: calc(100vh - 64px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink2);
+    padding: 0 20px 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  /* BUSCADOR */
+  .search-box {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-input {
+    width: 100%;
+    padding: 9px 12px 9px 36px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    background: var(--bg);
+    color: var(--ink);
+    position: relative;
+  }
+  .search-input:focus { outline: none; border-color: var(--gold); }
+  .search-wrap { position: relative; }
+  .search-wrap::before {
+    content: '🔍';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  /* LISTA DE CLIENTES */
+  .lista-clientes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .cliente-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .cliente-item:hover { background: #f0ede6; border-left-color: var(--gold-light); }
+  .cliente-item.activo { background: #e8f0f8; border-left-color: var(--accent); }
+  .cliente-item .ci-nombre {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cliente-item .ci-dni {
+    font-size: 0.78rem;
+    color: var(--ink2);
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .badge-fisica { background: #e8f0f8; color: var(--accent); }
+  .badge-juridica { background: #fef3e2; color: #7a4a00; }
+
+  .empty-list {
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--ink2);
+    font-size: 0.85rem;
+  }
+
+  /* CONTENIDO PRINCIPAL */
+  .content {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-y: auto;
+  }
+
+  /* PANEL BIENVENIDA */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    text-align: center;
+    color: var(--ink2);
+  }
+  .welcome-icon { font-size: 4rem; margin-bottom: 16px; }
+  .welcome h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--ink); margin-bottom: 8px; }
+  .welcome p { font-size: 0.92rem; max-width: 360px; line-height: 1.6; }
+
+  /* FORMULARIO */
+  .form-panel {
+    background: var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .form-header {
+    background: var(--accent);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .form-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+  }
+  .form-header .fh-id {
+    font-size: 0.78rem;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .form-body { padding: 24px; }
+
+  .seccion {
+    margin-bottom: 28px;
+  }
+  .seccion-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .sec-identidad { background: #1a3a5c; }
+  .sec-direccion { background: #1a5c2a; }
+  .sec-contacto { background: #4a1a5c; }
+  .sec-tipo { background: #5c3a1a; }
+  .sec-rep1 { background: #1a4a5c; }
+  .sec-rep2 { background: #2a5c4a; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .span2 { grid-column: span 2; }
+  .span3 { grid-column: span 3; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .field input, .field select, .field textarea {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: white;
+  }
+  .field input.upper { text-transform: uppercase; }
+  .field textarea { resize: vertical; min-height: 70px; }
+
+  .rep-panel {
+    background: #f8f6f0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  /* TOGGLE JURIDICA */
+  .juridica-section { display: none; }
+  .juridica-section.visible { display: block; }
+
+  /* FOOTER FORMULARIO */
+  .form-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    background: #fafaf7;
+  }
+
+  /* FICHA VISTA */
+  .ficha {
+    background: var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ficha-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #2a5080 100%);
+    color: white;
+    padding: 24px 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .ficha-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+  }
+  .ficha-dni { font-size: 0.92rem; opacity: 0.8; margin-top: 4px; }
+  .ficha-id { font-size: 0.75rem; opacity: 0.55; margin-top: 2px; }
+  .ficha-actions { display: flex; gap: 8px; }
+
+  .ficha-body { padding: 24px 28px; }
+  .ficha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .ficha-bloque {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .ficha-bloque h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink2);
+  }
+  .ficha-campo { margin-bottom: 8px; }
+  .ficha-campo .fc-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--ink2);
+    letter-spacing: 0.05em;
+  }
+  .ficha-campo .fc-val {
+    font-size: 0.92rem;
+    color: var(--ink);
+    margin-top: 1px;
+  }
+  .fc-val.vacio { color: #aaa; font-style: italic; font-size: 0.82rem; }
+  .fc-val a { color: var(--accent); text-decoration: none; }
+  .fc-val a:hover { text-decoration: underline; }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #1a1a2e;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    max-width: 360px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.ok { border-left: 4px solid #2ecc71; }
+  #toast.err { border-left: 4px solid #e74c3c; }
+
+  /* LOADING */
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    color: var(--ink2);
+    font-size: 0.9rem;
+  }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .contador {
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    color: var(--ink2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Gestoría <span>Justo Guevara</span></div>
+    <div class="subtitle">Base de Clientes Maestra</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline" onclick="cargarClientes()">↻ Actualizar</button>
+    <button class="btn btn-primary" onclick="mostrarFormulario()">+ Nuevo cliente</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Clientes</div>
+    <div class="search-box">
+      <div class="search-wrap">
+        <input type="text" class="search-input" id="buscador" placeholder="Buscar por nombre o DNI..." oninput="filtrarClientes()">
+      </div>
+    </div>
+    <div class="contador" id="contador">Cargando...</div>
+    <div class="lista-clientes" id="listaClientes">
+      <div class="loading"><div class="spinner"></div> Cargando clientes...</div>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="content" id="contenido">
+    <div class="welcome" id="panelBienvenida">
+      <div class="welcome-icon">👥</div>
+      <h2>Base de Clientes Maestra</h2>
+      <p>Selecciona un cliente de la lista o crea uno nuevo. Desde aquí gestionas todos los clientes de la gestoría en un único lugar.</p>
+      <br>
+      <button class="btn btn-primary" onclick="mostrarFormulario()" style="margin-top:8px">+ Nuevo cliente</button>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVXypuTXm5tRvbP-xJu06q7ZsJ2qve790lCyvBLJpr6jTckZhc6wZ4kX5XPhVOWCVrww/exec';
+
+let todosClientes = [];
+let clienteActual = null;
+let modoEdicion = false;
+
+// ============================================================
+// CARGA DE CLIENTES
+// ============================================================
+async function cargarClientes() {
+  document.getElementById('listaClientes').innerHTML = '<div class="loading"><div class="spinner"></div> Cargando...</div>';
+  document.getElementById('contador').textContent = 'Cargando...';
+  try {
+    const res = await fetch(SCRIPT_URL + '?accion=obtenerClientes');
+    const data = await res.json();
+    if (data.ok) {
+      todosClientes = data.clientes;
+      renderLista(todosClientes);
+      document.getElementById('contador').textContent = todosClientes.length + ' clientes';
+    } else {
+      throw new Error(data.error);
+    }
+  } catch(e) {
+    document.getElementById('listaClientes').innerHTML = '<div class="empty-list">❌ Error al cargar.<br>Comprueba la conexión.</div>';
+    document.getElementById('contador').textContent = 'Error';
+    toast('Error al cargar clientes: ' + e.message, 'err');
+  }
+}
+
+function renderLista(clientes) {
+  const lista = document.getElementById('listaClientes');
+  if (!clientes.length) {
+    lista.innerHTML = '<div class="empty-list">No hay clientes aún.<br>¡Crea el primero!</div>';
+    return;
+  }
+  lista.innerHTML = clientes.map(c => {
+    const nombre = [c.Nombre, c.Apellido1, c.Apellido2].filter(Boolean).join(' ') || c.Razon_Social || '(Sin nombre)';
+    const tipo = c.Tipo === 'JURIDICA' ? 'juridica' : 'fisica';
+    const badgeTexto = c.Tipo === 'JURIDICA' ? 'J' : 'F';
+    return `<div class="cliente-item ${clienteActual && clienteActual.ID_Cliente === c.ID_Cliente ? 'activo' : ''}" 
+      onclick="verCliente('${c.ID_Cliente}')">
+      <div class="ci-nombre">${nombre} <span class="badge badge-${tipo}">${badgeTexto}</span></div>
+      <div class="ci-dni">${c.DNI_NIE || c.CIF || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function filtrarClientes() {
+  const q = document.getElementById('buscador').value.toLowerCase();
+  if (!q) { renderLista(todosClientes); return; }
+  const filtrados = todosClientes.filter(c => {
+    const nombre = [c.Nombre, c.Apellido1, c.Apellido2, c.Razon_Social].filter(Boolean).join(' ').toLowerCase();
+    return nombre.includes(q) || (c.DNI_NIE || '').toLowerCase().includes(q) || (c.CIF || '').toLowerCase().includes(q);
+  });
+  document.getElementById('contador').textContent = filtrados.length + ' de ' + todosClientes.length;
+  renderLista(filtrados);
+}
+
+// ============================================================
+// VER FICHA CLIENTE
+// ============================================================
+function verCliente(id) {
+  clienteActual = todosClientes.find(c => c.ID_Cliente === id);
+  if (!clienteActual) return;
+  renderLista(todosClientes.filter(c => {
+    const q = document.getElementById('buscador').value.toLowerCase();
+    if (!q) return true;
+    const n = [c.Nombre,c.Apellido1,c.Apellido2,c.Razon_Social].filter(Boolean).join(' ').toLowerCase();
+    return n.includes(q)||(c.DNI_NIE||'').toLowerCase().includes(q);
+  }));
+
+  const c = clienteActual;
+  const nombre = c.Tipo === 'JURIDICA'
+    ? (c.Razon_Social || '—')
+    : [c.Nombre, c.Apellido1, c.Apellido2].filter(Boolean).join(' ') || '—';
+
+  const dir = [
+    c.Tipo_Via, c.Nombre_Via, c.Numero, c.Piso ? 'Piso '+c.Piso : '',
+    c.CP, c.Municipio, c.Provincia
+  ].filter(Boolean).join(', ') || '—';
+
+  function campo(label, val) {
+    const v = val || '';
+    return `<div class="ficha-campo">
+      <div class="fc-label">${label}</div>
+      <div class="fc-val ${!v ? 'vacio' : ''}">${v || 'No consta'}</div>
+    </div>`;
+  }
+
+  function campoLink(label, url, texto) {
+    if (!url) return campo(label, '');
+    return `<div class="ficha-campo">
+      <div class="fc-label">${label}</div>
+      <div class="fc-val"><a href="${url}" target="_blank">📎 ${texto || 'Ver documento'}</a></div>
+    </div>`;
+  }
+
+  let repHTML = '';
+  if (c.Rep1_Nombre || c.Rep1_DNI) {
+    repHTML += `<div class="ficha-bloque">
+      <h4>👤 Representante 1</h4>
+      ${campo('DNI/NIE', c.Rep1_DNI)}
+      ${campo('Nombre', [c.Rep1_Nombre,c.Rep1_Apellido1,c.Rep1_Apellido2].filter(Boolean).join(' '))}
+      ${campo('Cargo', c.Rep1_Cargo)}
+    </div>`;
+  }
+  if (c.Rep2_Nombre || c.Rep2_DNI) {
+    repHTML += `<div class="ficha-bloque">
+      <h4>👤 Representante 2</h4>
+      ${campo('DNI/NIE', c.Rep2_DNI)}
+      ${campo('Nombre', [c.Rep2_Nombre,c.Rep2_Apellido1,c.Rep2_Apellido2].filter(Boolean).join(' '))}
+      ${campo('Cargo', c.Rep2_Cargo)}
+    </div>`;
+  }
+
+  document.getElementById('contenido').innerHTML = `
+    <div class="ficha">
+      <div class="ficha-header">
+        <div>
+          <div class="ficha-nombre">${nombre}</div>
+          <div class="ficha-dni">${c.DNI_NIE || c.CIF || '—'} · ${c.Tipo || 'FISICA'}</div>
+          <div class="ficha-id">${c.ID_Cliente || ''} · Alta: ${c.Fecha_Alta || '—'}</div>
+        </div>
+        <div class="ficha-actions">
+          <button class="btn btn-outline btn-sm" onclick="mostrarFormulario('${id}')">✏️ Editar</button>
+        </div>
+      </div>
+      <div class="ficha-body">
+        <div class="ficha-grid">
+          <div class="ficha-bloque">
+            <h4>🪪 Identidad</h4>
+            ${campo('DNI/NIE', c.DNI_NIE)}
+            ${campo('Nombre', c.Nombre)}
+            ${campo('Primer apellido', c.Apellido1)}
+            ${campo('Segundo apellido', c.Apellido2)}
+            ${campo('Fecha nacimiento', c.Fecha_Nacimiento)}
+            ${campo('Vencimiento DNI', c.Fecha_Vencimiento_DNI)}
+            ${campo('Nacionalidad', c.Nacionalidad)}
+            ${campoLink('PDF DNI', c.PDF_DNI, 'Ver DNI')}
+          </div>
+          <div class="ficha-bloque">
+            <h4>🏠 Dirección</h4>
+            ${campo('Dirección', dir)}
+            ${campo('Código INE', c.Codigo_INE)}
+          </div>
+          <div class="ficha-bloque">
+            <h4>📞 Contacto</h4>
+            ${campo('Teléfono 1', c.Telefono1)}
+            ${campo('Teléfono 2', c.Telefono2)}
+            ${campo('Email', c.Email)}
+          </div>
+          ${c.Tipo === 'JURIDICA' ? `<div class="ficha-bloque">
+            <h4>🏢 Persona jurídica</h4>
+            ${campo('Razón social', c.Razon_Social)}
+            ${campo('CIF', c.CIF)}
+          </div>` : ''}
+          ${repHTML}
+          ${c.Notas ? `<div class="ficha-bloque" style="grid-column: span 2">
+            <h4>📝 Notas</h4>
+            <p style="font-size:0.9rem;line-height:1.5">${c.Notas}</p>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// FORMULARIO ALTA / EDICIÓN
+// ============================================================
+function mostrarFormulario(id) {
+  modoEdicion = !!id;
+  const c = id ? (todosClientes.find(x => x.ID_Cliente === id) || {}) : {};
+
+  document.getElementById('contenido').innerHTML = `
+    <div class="form-panel">
+      <div class="form-header">
+        <div>
+          <h2>${modoEdicion ? '✏️ Editar cliente' : '➕ Nuevo cliente'}</h2>
+          ${modoEdicion ? `<div class="fh-id">${c.ID_Cliente || ''}</div>` : ''}
+        </div>
+        ${modoEdicion ? `<button class="btn btn-outline btn-sm" onclick="verCliente('${id}')">✕ Cancelar</button>` : 
+          `<button class="btn btn-outline btn-sm" onclick="document.getElementById('contenido').innerHTML=document.getElementById('panelBienvenidaHTML').innerHTML">✕ Cancelar</button>`}
+      </div>
+      <div class="form-body">
+
+        <!-- IDENTIDAD -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-identidad">🪪 Identidad</span>
+          <div class="form-grid form-grid-3">
+            <div class="field">
+              <label>DNI / NIE *</label>
+              <input type="text" id="f_DNI_NIE" class="upper" value="${c.DNI_NIE||''}" placeholder="12345678A" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div class="field">
+              <label>Nombre *</label>
+              <input type="text" id="f_Nombre" value="${c.Nombre||''}" placeholder="María">
+            </div>
+            <div class="field">
+              <label>Primer apellido *</label>
+              <input type="text" id="f_Apellido1" value="${c.Apellido1||''}" placeholder="García">
+            </div>
+            <div class="field">
+              <label>Segundo apellido</label>
+              <input type="text" id="f_Apellido2" value="${c.Apellido2||''}" placeholder="López">
+            </div>
+            <div class="field">
+              <label>Fecha nacimiento</label>
+              <input type="date" id="f_Fecha_Nacimiento" value="${c.Fecha_Nacimiento||''}">
+            </div>
+            <div class="field">
+              <label>Vencimiento DNI</label>
+              <input type="date" id="f_Fecha_Vencimiento_DNI" value="${c.Fecha_Vencimiento_DNI||''}">
+            </div>
+            <div class="field">
+              <label>Nacionalidad</label>
+              <input type="text" id="f_Nacionalidad" value="${c.Nacionalidad||''}" placeholder="ESPAÑOLA">
+            </div>
+            <div class="field span2">
+              <label>PDF DNI (enlace Drive)</label>
+              <input type="text" id="f_PDF_DNI" value="${c.PDF_DNI||''}" placeholder="https://drive.google.com/...">
+            </div>
+          </div>
+        </div>
+
+        <!-- DIRECCIÓN -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-direccion">🏠 Dirección</span>
+          <div class="form-grid form-grid-3">
+            <div class="field">
+              <label>Tipo vía</label>
+              <select id="f_Tipo_Via">
+                ${['','CALLE','AVENIDA','PLAZA','PASEO','CAMINO','CARRETERA','URBANIZACIÓN','OTRO'].map(v=>`<option ${c.Tipo_Via===v?'selected':''}>${v}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field span2">
+              <label>Nombre vía</label>
+              <input type="text" id="f_Nombre_Via" value="${c.Nombre_Via||''}" placeholder="Gran Vía">
+            </div>
+            <div class="field">
+              <label>Número</label>
+              <input type="text" id="f_Numero" value="${c.Numero||''}" placeholder="12">
+            </div>
+            <div class="field">
+              <label>Piso / Puerta</label>
+              <input type="text" id="f_Piso" value="${c.Piso||''}" placeholder="2º B">
+            </div>
+            <div class="field">
+              <label>Código postal</label>
+              <input type="text" id="f_CP" value="${c.CP||''}" placeholder="04800">
+            </div>
+            <div class="field">
+              <label>Municipio</label>
+              <input type="text" id="f_Municipio" value="${c.Municipio||''}" placeholder="Olula del Río">
+            </div>
+            <div class="field">
+              <label>Provincia</label>
+              <input type="text" id="f_Provincia" value="${c.Provincia||''}" placeholder="Almería">
+            </div>
+            <div class="field">
+              <label>Código INE</label>
+              <input type="text" id="f_Codigo_INE" value="${c.Codigo_INE||''}" placeholder="04068">
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTACTO -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-contacto">📞 Contacto</span>
+          <div class="form-grid form-grid-3">
+            <div class="field">
+              <label>Teléfono 1</label>
+              <input type="tel" id="f_Telefono1" value="${c.Telefono1||''}" placeholder="600000000">
+            </div>
+            <div class="field">
+              <label>Teléfono 2</label>
+              <input type="tel" id="f_Telefono2" value="${c.Telefono2||''}" placeholder="950000000">
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" id="f_Email" value="${c.Email||''}" placeholder="cliente@email.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- TIPO DE CLIENTE -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-tipo">🏢 Tipo de cliente</span>
+          <div class="form-grid form-grid-3">
+            <div class="field">
+              <label>Tipo *</label>
+              <select id="f_Tipo" onchange="toggleJuridica()">
+                <option ${c.Tipo==='FISICA'||!c.Tipo?'selected':''}>FISICA</option>
+                <option ${c.Tipo==='JURIDICA'?'selected':''}>JURIDICA</option>
+              </select>
+            </div>
+            <div class="field span2 juridica-section ${c.Tipo==='JURIDICA'?'visible':''}" id="campo_razon">
+              <label>Razón social</label>
+              <input type="text" id="f_Razon_Social" value="${c.Razon_Social||''}" placeholder="Empresa S.L.">
+            </div>
+            <div class="field juridica-section ${c.Tipo==='JURIDICA'?'visible':''}" id="campo_cif">
+              <label>CIF</label>
+              <input type="text" id="f_CIF" class="upper" value="${c.CIF||''}" oninput="this.value=this.value.toUpperCase()">
+            </div>
+          </div>
+        </div>
+
+        <!-- REPRESENTANTE 1 -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-rep1">👤 Representante 1</span>
+          <div class="rep-panel">
+            <div class="form-grid form-grid-3">
+              <div class="field">
+                <label>DNI/NIE Rep. 1</label>
+                <input type="text" id="f_Rep1_DNI" class="upper" value="${c.Rep1_DNI||''}" oninput="this.value=this.value.toUpperCase()">
+              </div>
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="f_Rep1_Nombre" value="${c.Rep1_Nombre||''}">
+              </div>
+              <div class="field">
+                <label>Primer apellido</label>
+                <input type="text" id="f_Rep1_Apellido1" value="${c.Rep1_Apellido1||''}">
+              </div>
+              <div class="field">
+                <label>Segundo apellido</label>
+                <input type="text" id="f_Rep1_Apellido2" value="${c.Rep1_Apellido2||''}">
+              </div>
+              <div class="field">
+                <label>Cargo</label>
+                <input type="text" id="f_Rep1_Cargo" value="${c.Rep1_Cargo||''}" placeholder="Administrador/a">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPRESENTANTE 2 -->
+        <div class="seccion">
+          <span class="seccion-titulo sec-rep2">👤 Representante 2</span>
+          <div class="rep-panel">
+            <div class="form-grid form-grid-3">
+              <div class="field">
+                <label>DNI/NIE Rep. 2</label>
+                <input type="text" id="f_Rep2_DNI" class="upper" value="${c.Rep2_DNI||''}" oninput="this.value=this.value.toUpperCase()">
+              </div>
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="f_Rep2_Nombre" value="${c.Rep2_Nombre||''}">
+              </div>
+              <div class="field">
+                <label>Primer apellido</label>
+                <input type="text" id="f_Rep2_Apellido1" value="${c.Rep2_Apellido1||''}">
+              </div>
+              <div class="field">
+                <label>Segundo apellido</label>
+                <input type="text" id="f_Rep2_Apellido2" value="${c.Rep2_Apellido2||''}">
+              </div>
+              <div class="field">
+                <label>Cargo</label>
+                <input type="text" id="f_Rep2_Cargo" value="${c.Rep2_Cargo||''}" placeholder="Apoderado/a">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTAS -->
+        <div class="seccion">
+          <div class="field">
+            <label>📝 Notas internas</label>
+            <textarea id="f_Notas" placeholder="Observaciones sobre el cliente...">${c.Notas||''}</textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-accent" id="btnGuardar" onclick="guardarCliente()">💾 Guardar cliente</button>
+      </div>
+    </div>`;
+
+  // Guardar id de edición en el botón
+  document.getElementById('btnGuardar').dataset.id = id || '';
+}
+
+function toggleJuridica() {
+  const es = document.getElementById('f_Tipo').value === 'JURIDICA';
+  ['campo_razon','campo_cif'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('visible', es);
+  });
+}
+
+// ============================================================
+// GUARDAR CLIENTE
+// ============================================================
+async function guardarCliente() {
+  const btn = document.getElementById('btnGuardar');
+  const idEdicion = btn.dataset.id;
+
+  const get = id => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
+
+  if (!get('f_DNI_NIE') && !get('f_CIF')) {
+    toast('El DNI/NIE o CIF es obligatorio', 'err'); return;
+  }
+  if (!get('f_Nombre') && !get('f_Razon_Social')) {
+    toast('El nombre o razón social es obligatorio', 'err'); return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+
+  const datos = {
+    accion: 'guardarCliente',
+    ID_Cliente: idEdicion || '',
+    DNI_NIE: get('f_DNI_NIE'),
+    Nombre: get('f_Nombre'),
+    Apellido1: get('f_Apellido1'),
+    Apellido2: get('f_Apellido2'),
+    Fecha_Nacimiento: get('f_Fecha_Nacimiento'),
+    Fecha_Vencimiento_DNI: get('f_Fecha_Vencimiento_DNI'),
+    Nacionalidad: get('f_Nacionalidad').toUpperCase(),
+    PDF_DNI: get('f_PDF_DNI'),
+    Tipo_Via: get('f_Tipo_Via'),
+    Nombre_Via: get('f_Nombre_Via'),
+    Numero: get('f_Numero'),
+    Piso: get('f_Piso'),
+    CP: get('f_CP'),
+    Municipio: get('f_Municipio'),
+    Provincia: get('f_Provincia'),
+    Codigo_INE: get('f_Codigo_INE'),
+    Telefono1: get('f_Telefono1'),
+    Telefono2: get('f_Telefono2'),
+    Email: get('f_Email'),
+    Tipo: get('f_Tipo'),
+    Razon_Social: get('f_Razon_Social'),
+    CIF: get('f_CIF'),
+    Rep1_DNI: get('f_Rep1_DNI'),
+    Rep1_Nombre: get('f_Rep1_Nombre'),
+    Rep1_Apellido1: get('f_Rep1_Apellido1'),
+    Rep1_Apellido2: get('f_Rep1_Apellido2'),
+    Rep1_Cargo: get('f_Rep1_Cargo'),
+    Rep2_DNI: get('f_Rep2_DNI'),
+    Rep2_Nombre: get('f_Rep2_Nombre'),
+    Rep2_Apellido1: get('f_Rep2_Apellido1'),
+    Rep2_Apellido2: get('f_Rep2_Apellido2'),
+    Rep2_Cargo: get('f_Rep2_Cargo'),
+    Notas: get('f_Notas')
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(datos)
+    });
+    const result = await res.json();
+    if (result.ok) {
+      toast(result.accion === 'creado' ? '✅ Cliente creado correctamente' : '✅ Cliente actualizado', 'ok');
+      await cargarClientes();
+      // Mostrar ficha del cliente guardado
+      setTimeout(() => {
+        const nuevo = todosClientes.find(c => c.DNI_NIE === datos.DNI_NIE || c.CIF === datos.CIF);
+        if (nuevo) verCliente(nuevo.ID_Cliente);
+      }, 300);
+    } else {
+      throw new Error(result.error);
+    }
+  } catch(e) {
+    toast('Error al guardar: ' + e.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '💾 Guardar cliente';
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, tipo) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (tipo || 'ok');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+cargarClientes();
+</script>
+</body>
+</html>
